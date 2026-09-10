@@ -102,29 +102,6 @@ assert tx.rolled_back() is False
 
 ---
 
-## Protocols
-
-`FakePool` and `FakeConnection` satisfy the following structural protocols, which are compatible with the real `asyncpg` API:
-
-```python
-class Pool(Protocol):
-    def acquire(self) -> AsyncContextManager[Connection]: ...
-    async def close(self) -> None: ...
-
-class Connection(Protocol):
-    async def fetch(self, query: str, *args: Any) -> list[dict[str, Any]]: ...
-    async def fetchrow(self, query: str, *args: Any) -> dict[str, Any] | None: ...
-    async def execute(self, query: str, *args: Any) -> str: ...
-    def transaction(self) -> Transaction: ...
-
-class Transaction(Protocol):
-    async def start(self) -> None: ...
-    async def commit(self) -> None: ...
-    async def rollback(self) -> None: ...
-```
-
----
-
 ## License
 
 [MIT](LICENSE)
