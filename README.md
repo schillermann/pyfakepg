@@ -24,7 +24,9 @@ mock_pool = MagicMock()
 mock_pool.acquire().__aenter__.return_value.fetchrow.return_value = {"id": "1"}
 
 # ✅ Fake — clean, composable, no magic
-pool = FakePool().with_row("SELECT * FROM users", {"id": "1", "name": "Max"})
+pool = FakePool(
+    FakeRows("SELECT * FROM users", {"id": "1", "name": "Max"}),
+)
 ```
 
 ---
@@ -33,18 +35,19 @@ pool = FakePool().with_row("SELECT * FROM users", {"id": "1", "name": "Max"})
 
 ### FakePool
 
-`FakePool` matches queries by substring against registered rows and returns results via a `FakeConnection`. It is immutable — builder methods always return a new instance.
+`FakePool` accepts `FakeRows` objects as constructor arguments — one per query pattern.
+`FakeRows` matches queries by substring and returns the registered rows.
 
 ```python
-from pyfakepg import FakePool
+from pyfakepg import FakePool, FakeRows
 
-pool = (
-    FakePool()
-    .with_row("SELECT * FROM users", {"id": "usr_1", "name": "Max Mustermann"})
-    .with_rows("SELECT * FROM tenants", [
+pool = FakePool(
+    FakeRows("SELECT * FROM users", {"id": "usr_1", "name": "Max Mustermann"}),
+    FakeRows(
+        "SELECT * FROM tenants",
         {"id": "t_1", "name": "Acme GmbH"},
         {"id": "t_2", "name": "Beta AG"},
-    ])
+    ),
 )
 
 async with pool.acquire() as conn:
@@ -76,9 +79,8 @@ user = PgUser(pool=asyncpg_pool, user_id="usr_1")
 
 # Test — no database required
 async def test_user_name():
-    pool = FakePool().with_row(
-        "SELECT * FROM users",
-        {"id": "usr_1", "name": "Max Mustermann"},
+    pool = FakePool(
+        FakeRows("SELECT * FROM users", {"id": "usr_1", "name": "Max Mustermann"}),
     )
     user = PgUser(pool=pool, user_id="usr_1")
     assert await user.name() == "Max Mustermann"

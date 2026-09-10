@@ -1,52 +1,33 @@
 """FakePool — In-memory fake for asyncpg Pool."""
 
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator
+from typing import AsyncIterator
 from pyfakepg.fake_connection import FakeConnection
+from pyfakepg.fake_rows import FakeRows
 
 
 class FakePool:
     """
     In-memory fake implementation of Pool.
-    Provides a composable builder API to register query-to-rows mappings.
-    acquire() returns a FakeConnection loaded with all registered rows.
+    Accepts FakeRows objects as constructor arguments — one per query pattern.
+    acquire() returns a FakeConnection loaded with all registered FakeRows.
     100% Code-Free Constructor (Elegant Objects).
 
     Usage:
-        pool = (
-            FakePool()
-            .with_rows("SELECT * FROM users", [{"id": "1", "name": "Max"}])
-            .with_rows("SELECT * FROM tenants", [{"id": "t_1", "name": "Acme"}])
+        pool = FakePool(
+            FakeRows("SELECT * FROM users", {"id": "usr_1", "name": "Max"}),
+            FakeRows("SELECT * FROM tenants", {"id": "t_1"}, {"id": "t_2"}),
         )
         async with pool.acquire() as conn:
-            rows = await conn.fetch("SELECT * FROM users WHERE id = $1", "1")
+            row = await conn.fetchrow("SELECT * FROM users WHERE id = $1", "usr_1")
     """
 
-    def __init__(
-        self,
-        rows: tuple[tuple[str, list[dict[str, Any]]], ...] = (),
-    ) -> None:
+    def __init__(self, *rows: FakeRows) -> None:
         self._rows = rows
-
-    def with_rows(
-        self,
-        query_substr: str,
-        rows: list[dict[str, Any]],
-    ) -> "FakePool":
-        """Return a new FakePool with an additional query-to-rows mapping."""
-        return FakePool(self._rows + ((query_substr, rows),))
-
-    def with_row(
-        self,
-        query_substr: str,
-        row: dict[str, Any],
-    ) -> "FakePool":
-        """Return a new FakePool with an additional query-to-single-row mapping."""
-        return FakePool(self._rows + ((query_substr, [row]),))
 
     @asynccontextmanager
     async def acquire(self) -> AsyncIterator[FakeConnection]:
-        """Yield a FakeConnection loaded with all registered rows."""
+        """Yield a FakeConnection loaded with all registered FakeRows."""
         yield FakeConnection(self._rows)
 
     async def close(self) -> None:
