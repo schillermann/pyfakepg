@@ -8,7 +8,7 @@ from pyfakepg.fake_transaction import FakeTransaction
 from pyfakepg.pool import Pool
 from pyfakepg.transaction import Transaction
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "__version__",

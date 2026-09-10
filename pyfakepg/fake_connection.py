@@ -19,14 +19,14 @@ class FakeConnection:
     async def fetch(self, query: str, *args: Any) -> list[dict[str, Any]]:
         """Return all rows from the first FakeRows matching the query."""
         for fake_rows in self._rows:
-            if fake_rows.matches(query):
+            if fake_rows.matches(query, *args):
                 return fake_rows.all()
         return []
 
     async def fetchrow(self, query: str, *args: Any) -> dict[str, Any] | None:
         """Return the first row from the first FakeRows matching the query."""
         for fake_rows in self._rows:
-            if fake_rows.matches(query):
+            if fake_rows.matches(query, *args):
                 return fake_rows.first()
         return None
 
