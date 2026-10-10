@@ -2,6 +2,8 @@
 
 Fake [asyncpg](https://github.com/MagicStack/asyncpg) objects for unit tests. No mocks, no database.
 
+While intended as an extension for [pyresponse](https://github.com/schillermann/pyresponse), `pyfakepg` can also be used completely standalone.
+
 Inspired by [jcabi-dynamo](https://dynamo.jcabi.com/) and [Yegor Bugayenko's](https://www.yegor256.com/) principle of fake classes over mocking.
 
 ---
