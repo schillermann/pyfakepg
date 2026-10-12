@@ -104,6 +104,23 @@ assert tx.rolled_back() is False
 
 ---
 
+## FAQ
+
+### Does it validate SQL queries?
+
+**No, and that is by design.** `pyfakepg` is not an in-memory SQL engine and does not parse or validate queries.
+
+It is designed for the **unit test level** to test your application and domain logic in isolation:
+
+| Level | Tool | What is tested |
+|---|---|---|
+| **Unit Tests** | `pyfakepg` | How does your Python/domain logic behave for given database results? (Edge cases, mapping, business rules). Runs in microseconds, 100% in-memory, no Docker or DB needed. |
+| **Integration Tests** | Real PostgreSQL (e.g., [Testcontainers](https://testcontainers-python.readthedocs.io/)) | Is the SQL syntax valid? Do column names, types, constraints, and dialect features match the real schema? |
+
+`FakeRows` matches queries via substring matching (`FakeRows("SELECT * FROM users", ...)`). It acts as a predictable fake data provider for your domain objects, not as a database emulator.
+
+---
+
 ## License
 
 [MIT](LICENSE)
